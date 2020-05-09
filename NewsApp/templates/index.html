@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+    <head> 
+        <meta charset="utf-8">
+        <title>Homework 6</title>
+        <link rel="stylesheet" type="text/css" href="static/css/style.css">
+    </head>
+    <body>
+        <div class="container">
+            <br>
+            <div id="left">
+                <div class="buttons">
+                        <button id="button1" class="btn btn-primary" onclick="changeActive(0);" style="border-top-left-radius: 4px; border-top-right-radius: 4px;">Google News</button>
+                        <br>
+                        <button id="button2" class="btn btn-primary" onclick="changeActive(1);" style="border-bottom-left-radius: 4px; border-bottom-right-radius: 4px;">Search</button>
+                </div>
+            </div>
+            <div id="right">
+                <!-- HOME SECTION START -->
+                <div id="home">
+                    <!-- TOP SECTION START -->
+                    <div class="top">
+                        <div class="carousel" id="carousel"></div>
+                        <div class="wordcloud">
+                            <div class="innerWord" id="my_dataviz"></div>
+                        </div>
+                    </div>
+                    <!-- TOP SECTION END -->
+
+                    <br>
+                    
+                    <!-- BOTTOM SECTION START -->
+                    <div class="bottom">
+                        <div class="CNN">
+                            <h1>CNN</h1>
+                            <hr style="border-top: dotted 1px;" >
+                            <div id="cnn-cards"></div>
+                        </div>
+                        <br>
+                        <div class="FOX">
+                            <h1>Fox News</h1>
+                            <hr style="border-top: dotted 1px;" >
+                            <div id="fox-cards">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- BOTTOM SECTION START -->                    
+                </div>
+                <!-- HOME SECTION END -->
+
+                <div id="search">
+                    <div class="formDiv">
+                        <form onsubmit=" return formFunc();">
+                            <div class="line1">
+                                <div class="lineElement">
+                                    <label for="q">Keyword<span style="color: red;">*</span></label>
+                                    <input type="text" name="q" id="q" style="font-size: 1rem" size="12" title="Please fill out this field" required>
+                                </div>
+                                <div class="lineElement">
+                                    <label for="from">From<span style="color: red;">*</span></label>
+                                    <input type="date" name="from" id="from" required style="font-size: 1rem">
+                                </div>
+                                <div class="lineElement">
+                                    <label for="to">To<span style="color: red;">*</span></label>
+                                    <input type="date" name="to" id="to" required style="font-size: 1rem">
+                                </div>
+                            </div>
+                            <div class="line2">
+                                <div class="lineElement" >
+                                    <label for="category">Category</label>
+                                    <select name="category" id="category" onchange="populate(this.value);">
+                                        <option value="all" selected>all</option>
+                                        <option value="business">business</option>
+                                        <option value="entertainment">entertainment</option>
+                                        <option value="general">general</option>
+                                        <option value="health">health</option>
+                                        <option value="science">science</option>
+                                        <option value="sports">sports</option>
+                                        <option value="technology">technology</option>    
+                                    </select>
+                                </div>
+                                <div class="lineElement">
+                                    <label for="source">Source</label>
+                                    <select name="source" id="source">
+                                        <option value="all" selected>all</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button class="btn-form" onclick="getResults();">Search</button>
+                            <button class="btn-form" onclick="clearForm();">Clear</button>
+                        </form>
+                    </div>
+                    <br>
+                    <div class="results">
+                        <div id="results">
+                            <div id="less" style="width: 100%"></div>
+                            <button id="showmorebutton" onclick="moreResults();">Show More</button>
+                            <div id="more" style="width: 100%"></div>
+                            <button id="showlessbutton" onclick="lessResults();">Show Less</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js"></script>
+    <script src="static/js/carousel.js"></script>
+    <script src="static/js/wordcloud.js"></script>
+    <script src="static/js/homeElements.js"></script>
+    <script src="static/js/form.js"></script>
+    <script>
+        document.getElementById('home').style.display = 'block';
+        document.getElementById('search').style.display = 'none';
+        document.getElementById('button1').classList.add('btn-active');
+        document.getElementById('button2').classList.remove('btn-active');
+        document.getElementById('showlessbutton').style.display = 'none';
+        document.getElementById('showmorebutton').style.display = 'none';
+        var getDaysInMonth = function(month,year) {
+            return new Date(year, month, 0).getDate();
+        };
+        function reset() {
+            var t = new Date();
+            var day = String(t.getDate()).padStart(2, '0');
+            var mon = String(t.getMonth()+1).padStart(2, '0');
+            var year = String(t.getFullYear());
+            document.getElementById('to').value = year+'-'+mon+'-'+day;
+            var f = t.getDate() - 7;
+            var from = new Date();
+            from.setDate(f);
+            var day = String(from.getDate()).padStart(2, '0');
+            var mon = String(from.getMonth()+1).padStart(2, '0');
+            var year = String(from.getFullYear());
+            document.getElementById('from').value = year+'-'+mon+'-'+day;
+            populate('all');
+        }
+        reset();
+        function changeActive(a) {
+            if (a == 0) {
+                document.getElementById('home').style.display = 'block';
+                document.getElementById('search').style.display = 'none';
+                document.getElementById('button1').classList.add('btn-active');                
+                document.getElementById('button2').classList.remove('btn-active');                
+            }
+            else {
+                document.getElementById('home').style.display = 'none';
+                document.getElementById('search').style.display = 'block';
+                document.getElementById('button1').classList.remove('btn-active');
+                document.getElementById('button2').classList.add('btn-active');
+            }
+        }
+    </script>
+    </body>
+</html>
